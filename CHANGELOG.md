@@ -15,6 +15,20 @@ Minor versions track the project's weekly research milestones (see the
 - Dataset expansion to ~100–200 hand-audited questions with statement-level
   support labels.
 
+## [0.2.2] — 2026-07-06
+
+### Added
+- **Offline re-scoring** (`citeval/rescore.py`): each eval run now stores the
+  full retrieved passages, so any change to the NLI judge, threshold, or metric
+  can be applied to already-collected answers in **seconds** — no PaperPal, no
+  Ollama. Generating answers (slow, GPU) is now decoupled from scoring (cheap,
+  CPU). `python -m citeval.rescore --all --in-place` re-scores every run.
+- `make rescore` target; README "iterate on scoring" section.
+
+### Changed
+- `run_faithfulness` result rows now include a `retrieved` field (passages with
+  text) alongside the existing `retrieved_keys`.
+
 ## [0.2.1] — 2026-07-06
 
 ### Fixed
@@ -84,7 +98,8 @@ live PaperPal RAG system, with the Week-1 dataset pinned.
   numbers against Ollama models, the controlled study, and the NLI verifier
   follow in subsequent milestones.
 
-[Unreleased]: https://github.com/pedromussi1/cite-faithfulness/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/pedromussi1/cite-faithfulness/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.2.2
 [0.2.1]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.2.1
 [0.2.0]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.2.0
 [0.1.0]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.1.0

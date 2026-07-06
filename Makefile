@@ -30,5 +30,8 @@ sweep:              ## controlled study: retrieval-config x model-size (Windows/
 report:             ## aggregate all runs/ into REPORT.md with bootstrap CIs + significance
 	python -m citeval.report --all --baseline dense-8b
 
+rescore:            ## re-score all runs offline after an NLI/metric change (seconds, no server)
+	python -m citeval.rescore --all --in-place --nli cross-encoder/nli-deberta-v3-base
+
 figures:            ## render error-bar PNGs (needs: pip install -e ".[viz]")
 	python -m citeval.report --all --baseline dense-8b --figures

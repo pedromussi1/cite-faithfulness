@@ -84,6 +84,11 @@ async def main(base_url: str, run_name: str, nli_name: str, threshold: float) ->
                 rec = {
                     **q,
                     "answer": outcome.answer,
+                    # Full retrieved payload (incl. passage text) is stored so the
+                    # run can be re-scored offline after any NLI/metric change —
+                    # see citeval.rescore. This is what makes scoring cheap to
+                    # iterate without re-querying PaperPal + Ollama.
+                    "retrieved": outcome.retrieved,
                     "retrieved_keys": sorted(
                         {f"{r['paper_id']}:{r['page']}" for r in outcome.retrieved}
                     ),

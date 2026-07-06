@@ -94,6 +94,18 @@ per-question fully-supported outcome. A ΔF1 CI that spans zero is reported as a
 honest non-result, not a win. The statistics (`citeval/stats.py`) are pure
 stdlib and unit-tested; `--seed` makes every interval reproducible.
 
+**Iterate on scoring without re-running the models.** Each run stores the full
+retrieved passages, so after any change to the NLI judge, threshold, or metric
+you can re-score every archived run in seconds — no PaperPal, no Ollama:
+
+```bash
+python -m citeval.rescore --all --in-place    # re-score, then re-report
+python -m citeval.report --all --baseline dense-8b
+```
+
+Generating answers is the slow part (needs the GPU host); scoring is cheap and
+now decoupled from it.
+
 ## Layout
 
 ```
@@ -104,6 +116,7 @@ citeval/
   run_faithfulness.py  offline eval driver → runs/<name>/
   stats.py             bootstrap CIs + paired bootstrap + exact McNemar
   report.py            aggregate runs → REPORT.md (CIs + significance)
+  rescore.py           re-score archived runs offline (no server/model)
   plots.py             error-bar figures (optional matplotlib)
   demo.py              self-contained worked example (no server/model)
 scripts/
