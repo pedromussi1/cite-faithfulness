@@ -12,10 +12,11 @@ citation-grounded RAG — reproducing the ALCE citation precision/recall metric
 > is attached to**, using a Natural Language Inference model. That is the
 > difference between "cited the right place" and "the citation is faithful."
 
-Status: **Week 1** — metric reproduced and unit-tested; offline driver wired to
-PaperPal's `/query` API; Week-1 dataset pinned. Controlled study (retrieval
-configs × model sizes, bootstrap CIs) and a novel NLI verifier follow in
-Weeks 2–3. See [`PLAN` in the parent repo](../) for the full arc.
+Status: **Week 2** — metric reproduced and unit-tested (Week 1); now with a
+**controlled study**: a retrieval-config × model-size sweep scored with
+**bootstrap 95% confidence intervals** and **paired significance tests**, plus a
+results report and error-bar figures. A novel NLI citation verifier follows in
+Week 3. See [`PLAN` in the parent repo](../) for the full arc.
 
 ## The metric (ALCE, reproduced)
 
@@ -67,6 +68,32 @@ questions, scores citation faithfulness, and writes per-question rows +
 `summary.json` under `runs/<name>/`. `--nli mock` gives a no-download smoke test
 (still needs the backend up).
 
+## Controlled study (Week 2)
+
+Sweep the retrieval configuration (`dense` / `hybrid` / `rerank` /
+`hybrid+rerank`) against model size (Llama 3.2 3B vs 3.1 8B), then aggregate
+with uncertainty:
+
+```bash
+# 1. Run the 4×2 sweep — restarts PaperPal per cell with the right env vars.
+#    (Windows/PowerShell; mirrors PaperPal's own run_ablation.ps1.)
+powershell -File scripts/run_sweep.ps1
+
+# 2. Build the results report: bootstrap 95% CIs + paired significance tests.
+python -m citeval.report --all --baseline dense-8b
+
+# 3. Optional error-bar figures.
+pip install -e ".[viz]"
+python -m citeval.report --all --baseline dense-8b --figures
+```
+
+The report gives each configuration's citation precision/recall/F1 as a point
+estimate **with a bootstrap 95% CI**, and a pairwise table with the **paired
+bootstrap ΔF1 (CI + p-value)** and an **exact McNemar test** on the
+per-question fully-supported outcome. A ΔF1 CI that spans zero is reported as an
+honest non-result, not a win. The statistics (`citeval/stats.py`) are pure
+stdlib and unit-tested; `--seed` makes every interval reproducible.
+
 ## Layout
 
 ```
@@ -75,11 +102,16 @@ citeval/
   nli.py               NLI backends: CrossEncoderNLI (real) + KeywordNLI (tests)
   client.py            async PaperPal /query SSE client
   run_faithfulness.py  offline eval driver → runs/<name>/
+  stats.py             bootstrap CIs + paired bootstrap + exact McNemar
+  report.py            aggregate runs → REPORT.md (CIs + significance)
+  plots.py             error-bar figures (optional matplotlib)
   demo.py              self-contained worked example (no server/model)
+scripts/
+  run_sweep.ps1        retrieval-config × model-size sweep orchestrator
 data/
   papers/*.pdf         4 open-access ML papers (system-under-test corpus)
   questions.jsonl      26 hand-curated questions (see DATASET.md)
-tests/                 metric unit tests (KeywordNLI, no downloads)
+tests/                 metric + stats + report unit tests (no downloads)
 ```
 
 ## Why this is a research artifact, not just a script

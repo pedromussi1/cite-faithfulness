@@ -9,12 +9,38 @@ Minor versions track the project's weekly research milestones (see the
 
 ## [Unreleased]
 
-### Planned (Week 2 — controlled study)
-- `citeval/stats.py`: bootstrap 95% confidence intervals + paired significance
-  tests (paired bootstrap / McNemar) over per-question scores.
-- Config sweep runner: retrieval config (dense / +RRF-BM25 / +reranker) ×
-  model size (Llama 3.2 3B vs 3.1 8B), each archived under `runs/`.
-- Results tables + figures with error bars.
+### Planned (Week 3 — novel verifier)
+- A lightweight NLI citation verifier (flag + filter/rerank modes) vs. a
+  self-consistency baseline, measured against human labels.
+- Dataset expansion to ~100–200 hand-audited questions with statement-level
+  support labels.
+
+## [0.2.0] — 2026-07-06
+
+Second milestone: the controlled study — differences between configurations
+are now reported *with uncertainty*, not as bare point estimates.
+
+### Added
+- **Statistics module** (`citeval/stats.py`, pure stdlib, unit-tested):
+  percentile **bootstrap 95% confidence intervals**, a **paired bootstrap**
+  test for the mean F1 difference between two configs (CI + two-sided
+  p-value), and an **exact McNemar test** for the per-question
+  fully-supported outcome. Every result is reproducible via `--seed`.
+- **Results report** (`citeval/report.py`): aggregates any set of runs into a
+  `REPORT.md` with per-config precision/recall/F1 + CIs and a pairwise
+  significance table vs. a chosen baseline. A ΔF1 CI spanning zero is reported
+  as an honest non-result.
+- **Config-sweep orchestrator** (`scripts/run_sweep.ps1`): runs the retrieval
+  config (dense / hybrid / rerank / hybrid+rerank) × model size
+  (Llama 3.2 3B vs 3.1 8B) factorial, restarting PaperPal per cell with the
+  right env vars — mirrors PaperPal's own `run_ablation.ps1`.
+- **Error-bar figures** (`citeval/plots.py`, optional `[viz]` extra): grouped
+  bar chart of the metrics with bootstrap-CI error bars.
+- 13 new unit tests (stats correctness + report over synthetic runs).
+
+### Notes
+- The metric and statistics are verified offline; producing the live results
+  table requires running the sweep against PaperPal + Ollama on a GPU host.
 
 ## [0.1.0] — 2026-07-06
 
@@ -45,5 +71,6 @@ live PaperPal RAG system, with the Week-1 dataset pinned.
   numbers against Ollama models, the controlled study, and the NLI verifier
   follow in subsequent milestones.
 
-[Unreleased]: https://github.com/pedromussi1/cite-faithfulness/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/pedromussi1/cite-faithfulness/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.2.0
 [0.1.0]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.1.0
