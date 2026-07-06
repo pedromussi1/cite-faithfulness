@@ -33,6 +33,16 @@ class NLIModel(Protocol):
 
     def entails(self, premise: str, hypothesis: str) -> bool: ...
 
+    def entail_prob(self, premise: str, hypothesis: str) -> float:
+        """Continuous entailment score in [0, 1] — used to *rank* candidate
+        passages (e.g. the verifier picking the best-supporting citation)."""
+        ...
+
+    def entail_probs(self, pairs: list[tuple[str, str]]) -> list[float]:
+        """Batched ``entail_prob`` over many (premise, hypothesis) pairs — lets
+        the verifier score a whole passage pool in one forward pass."""
+        ...
+
 
 _WORD_RE = re.compile(r"[a-z0-9]+")
 # Content-word filter for the keyword stub: ignore common function words so
@@ -59,15 +69,21 @@ class KeywordNLI:
     def __init__(self, coverage: float = 0.999) -> None:
         self._coverage = coverage
 
-    def entails(self, premise: str, hypothesis: str) -> bool:
+    def entail_prob(self, premise: str, hypothesis: str) -> float:
+        """Fraction of the hypothesis's content words present in the premise."""
         if not premise.strip():
-            return False
+            return 0.0
         hyp = _content_words(hypothesis)
         if not hyp:
-            return True
+            return 1.0
         prem = _content_words(premise)
-        overlap = len(hyp & prem) / len(hyp)
-        return overlap >= self._coverage
+        return len(hyp & prem) / len(hyp)
+
+    def entails(self, premise: str, hypothesis: str) -> bool:
+        return self.entail_prob(premise, hypothesis) >= self._coverage
+
+    def entail_probs(self, pairs: list[tuple[str, str]]) -> list[float]:
+        return [self.entail_prob(p, h) for p, h in pairs]
 
 
 # Backwards/intent-friendly alias used in tests.
@@ -158,22 +174,37 @@ class CrossEncoderNLI:
         if self._entail_idx is None:
             self._entail_idx = 1  # documented default for cross-encoder/nli-*
 
-    def entail_prob(self, premise: str, hypothesis: str) -> float:
-        """Max entailment probability of ``hypothesis`` over the premise's
-        windows. Windowing makes the score independent of where the support
-        sits in a long passage (see ``pack_windows``)."""
-        if not premise.strip():
-            return 0.0
+    def entail_probs(self, pairs: list[tuple[str, str]]) -> list[float]:
+        """Batched entailment: window every premise, run ONE forward pass over
+        all windows, then reduce each pair to the max entailment across its
+        windows. Much faster than per-pair calls when scoring a passage pool."""
+        if not pairs:
+            return []
         self._ensure_loaded()
         assert self._model is not None and self._entail_idx is not None
         import numpy as np
 
-        windows = pack_windows(
-            premise, max_chars=self._window_chars, overlap_sents=self._overlap_sents
-        )
-        pairs = [(w, hypothesis) for w in windows]
-        scores = np.asarray(self._model.predict(pairs, apply_softmax=True))
-        return float(scores[:, self._entail_idx].max())
+        flat: list[tuple[str, str]] = []
+        spans: list[tuple[int, int]] = []  # [start, end) into flat for each pair
+        for premise, hypothesis in pairs:
+            start = len(flat)
+            if premise.strip():
+                windows = pack_windows(
+                    premise, max_chars=self._window_chars, overlap_sents=self._overlap_sents
+                )
+                flat.extend((w, hypothesis) for w in windows)
+            spans.append((start, len(flat)))
+
+        if not flat:
+            return [0.0] * len(pairs)
+        scores = np.asarray(self._model.predict(flat, apply_softmax=True))[:, self._entail_idx]
+        return [float(scores[s:e].max()) if e > s else 0.0 for s, e in spans]
+
+    def entail_prob(self, premise: str, hypothesis: str) -> float:
+        """Max entailment probability of ``hypothesis`` over the premise's
+        windows. Windowing makes the score independent of where the support
+        sits in a long passage (see ``pack_windows``)."""
+        return self.entail_probs([(premise, hypothesis)])[0]
 
     def entails(self, premise: str, hypothesis: str) -> bool:
         return self.entail_prob(premise, hypothesis) >= self.threshold
