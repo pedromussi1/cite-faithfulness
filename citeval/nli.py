@@ -74,6 +74,46 @@ class KeywordNLI:
 MockNLI = KeywordNLI
 
 
+_SENT_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
+
+
+def _split_plain_sentences(text: str) -> list[str]:
+    return [s for s in (p.strip() for p in _SENT_SPLIT_RE.split(text.strip())) if s]
+
+
+def pack_windows(text: str, *, max_chars: int, overlap_sents: int) -> list[str]:
+    """Split ``text`` into overlapping sentence windows each <= ~max_chars.
+
+    Small NLI cross-encoders truncate at 512 tokens, so a fact near the end of
+    a long passage gets silently cut and misjudged as unsupported. Scoring the
+    hypothesis against each window and taking the max entailment makes the
+    verdict independent of where in the passage the support lives. Consecutive
+    windows share ``overlap_sents`` sentences so support spanning a boundary
+    isn't lost.
+    """
+    text = text.strip()
+    if not text:
+        return []
+    if len(text) <= max_chars:
+        return [text]
+    sentences = _split_plain_sentences(text)
+    if not sentences:
+        return [text[:max_chars]]
+    windows: list[str] = []
+    cur: list[str] = []
+    cur_len = 0
+    for s in sentences:
+        if cur and cur_len + len(s) + 1 > max_chars:
+            windows.append(" ".join(cur))
+            cur = cur[-overlap_sents:] if overlap_sents else []
+            cur_len = sum(len(x) + 1 for x in cur)
+        cur.append(s)
+        cur_len += len(s) + 1
+    if cur:
+        windows.append(" ".join(cur))
+    return windows
+
+
 class CrossEncoderNLI:
     """Real NLI judge: a local cross-encoder trained on (M)NLI.
 
@@ -88,12 +128,16 @@ class CrossEncoderNLI:
         *,
         threshold: float = 0.5,
         device: str | None = None,
-        max_premise_chars: int = 4000,
+        window_chars: int = 1200,
+        overlap_sents: int = 1,
     ) -> None:
         self.model_name = model_name
         self.threshold = threshold
         self._device = device
-        self._max_premise_chars = max_premise_chars
+        # ~1200 chars keeps premise + hypothesis under the model's 512-token
+        # limit (roughly 4 chars/token) with headroom for the hypothesis.
+        self._window_chars = window_chars
+        self._overlap_sents = overlap_sents
         self._model = None  # loaded on first entails()
         self._entail_idx: int | None = None
 
@@ -114,17 +158,25 @@ class CrossEncoderNLI:
         if self._entail_idx is None:
             self._entail_idx = 1  # documented default for cross-encoder/nli-*
 
-    def entails(self, premise: str, hypothesis: str) -> bool:
+    def entail_prob(self, premise: str, hypothesis: str) -> float:
+        """Max entailment probability of ``hypothesis`` over the premise's
+        windows. Windowing makes the score independent of where the support
+        sits in a long passage (see ``pack_windows``)."""
         if not premise.strip():
-            return False
+            return 0.0
         self._ensure_loaded()
         assert self._model is not None and self._entail_idx is not None
         import numpy as np
 
-        premise = premise[: self._max_premise_chars]
-        scores = self._model.predict([(premise, hypothesis)], apply_softmax=True)
-        probs = np.asarray(scores)[0]
-        return bool(probs[self._entail_idx] >= self.threshold)
+        windows = pack_windows(
+            premise, max_chars=self._window_chars, overlap_sents=self._overlap_sents
+        )
+        pairs = [(w, hypothesis) for w in windows]
+        scores = np.asarray(self._model.predict(pairs, apply_softmax=True))
+        return float(scores[:, self._entail_idx].max())
+
+    def entails(self, premise: str, hypothesis: str) -> bool:
+        return self.entail_prob(premise, hypothesis) >= self.threshold
 
 
 def get_nli(name: str, **kwargs) -> NLIModel:

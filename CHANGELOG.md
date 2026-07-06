@@ -15,6 +15,19 @@ Minor versions track the project's weekly research milestones (see the
 - Dataset expansion to ~100–200 hand-audited questions with statement-level
   support labels.
 
+## [0.2.1] — 2026-07-06
+
+### Fixed
+- **NLI passage truncation** (`citeval/nli.py`): the cross-encoder judge
+  truncates at 512 tokens, so a supporting fact near the *end* of a long
+  retrieved passage was silently cut and misjudged as unsupported — artificially
+  depressing citation recall. `CrossEncoderNLI` now splits long premises into
+  overlapping windows (`pack_windows`), scores the hypothesis against each, and
+  takes the max entailment, making the verdict independent of where in the
+  passage the support lives. Verified: a fact buried after 6k chars of filler
+  went from entail=0.006 (miss) to 0.997 (correct); unrelated long text stays
+  0.0 (no false positives). Added `entail_prob()` and 5 windowing unit tests.
+
 ## [0.2.0] — 2026-07-06
 
 Second milestone: the controlled study — differences between configurations
@@ -71,6 +84,7 @@ live PaperPal RAG system, with the Week-1 dataset pinned.
   numbers against Ollama models, the controlled study, and the NLI verifier
   follow in subsequent milestones.
 
-[Unreleased]: https://github.com/pedromussi1/cite-faithfulness/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/pedromussi1/cite-faithfulness/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.2.1
 [0.2.0]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.2.0
 [0.1.0]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.1.0
