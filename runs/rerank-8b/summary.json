@@ -1,0 +1,11 @@
+{
+  "run": "rerank-8b",
+  "nli": "cross-encoder/nli-deberta-v3-base",
+  "n_questions": 26,
+  "citation_precision": 0.21153846153846154,
+  "citation_recall": 0.20512820512820515,
+  "citation_f1": 0.2076923076923077,
+  "total_citations": 31,
+  "total_hallucinated": 2,
+  "ts": "2026-07-06T21:22:19.991934+00:00"
+}

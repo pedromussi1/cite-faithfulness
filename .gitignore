@@ -6,6 +6,7 @@ __pycache__/
 .mypy_cache/
 *.egg-info/
 # Keep archived eval runs under version control (they are results), but ignore
-# scratch/timestamped runs.
+# scratch/timestamped runs and the uvicorn scratch logs.
 runs/run-*/
+runs/.last-uvicorn.*
 .env

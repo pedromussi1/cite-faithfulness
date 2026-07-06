@@ -1,0 +1,11 @@
+{
+  "run": "hybrid-3b",
+  "nli": "cross-encoder/nli-deberta-v3-base",
+  "n_questions": 26,
+  "citation_precision": 0.19230769230769232,
+  "citation_recall": 0.19230769230769232,
+  "citation_f1": 0.19230769230769232,
+  "total_citations": 25,
+  "total_hallucinated": 11,
+  "ts": "2026-07-06T20:55:26.783713+00:00"
+}

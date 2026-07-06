@@ -1,0 +1,11 @@
+{
+  "run": "dense-3b",
+  "nli": "cross-encoder/nli-deberta-v3-base",
+  "n_questions": 26,
+  "citation_precision": 0.15384615384615385,
+  "citation_recall": 0.1346153846153846,
+  "citation_f1": 0.14102564102564102,
+  "total_citations": 22,
+  "total_hallucinated": 12,
+  "ts": "2026-07-06T20:52:16.197277+00:00"
+}
