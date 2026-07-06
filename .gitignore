@@ -9,4 +9,6 @@ __pycache__/
 # scratch/timestamped runs and the uvicorn scratch logs.
 runs/run-*/
 runs/.last-uvicorn.*
+runs/*.log
+runs/*_console.txt
 .env

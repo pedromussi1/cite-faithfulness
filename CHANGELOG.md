@@ -9,11 +9,42 @@ Minor versions track the project's weekly research milestones (see the
 
 ## [Unreleased]
 
-### Planned (Week 3 — novel verifier)
-- A lightweight NLI citation verifier (flag + filter/rerank modes) vs. a
-  self-consistency baseline, measured against human labels.
-- Dataset expansion to ~100–200 hand-audited questions with statement-level
-  support labels.
+### Planned (Week 4 — writeup + robustness)
+- Verifier threshold sensitivity analysis (abstention vs. accuracy trade-off).
+- Human statement-level labels via `label_sheet.py` for the definitive
+  detection metric; dataset expansion to ~100–200 hand-audited questions.
+- `PAPER.md` writeup.
+
+## [0.3.0] — 2026-07-06
+
+Third milestone: the **novel contribution** — an NLI citation verifier — plus a
+non-circular evaluation and its first (honest, nuanced) findings.
+
+### Added
+- **NLI citation verifier** (`citeval/verifier.py`): flags cited sentences whose
+  own citations don't entail the claim, and repairs them by re-attributing to
+  the retrieved passage that best entails the claim (or *abstains* when none
+  does above a threshold).
+- **Non-circular evaluation** (`citeval/verify_eval.py`): scores the verifier
+  against the human-curated gold pages (`expected_pages`), not against its own
+  NLI judge. Reports repair lift (paired bootstrap ΔCI + p) and detection
+  precision/recall, → `runs/VERIFIER_REPORT.md`.
+- **Human-labeling sheet** (`citeval/label_sheet.py`): one row per cited
+  sentence (claim, cited pages, cited passage, NLI verdict) for a person to
+  mark `human_supported` — enables the definitive detection metric.
+- **Batched NLI** (`nli.py::entail_probs`): scores a whole passage pool in one
+  forward pass; ~several-fold faster verifier eval. Added `entail_prob(s)` to
+  the `NLIModel` protocol and `KeywordNLI`.
+- `make verify` / `make labels`; 4 verifier unit tests (34 total).
+
+### Findings (n=26, threshold=0.5)
+- **Detection works**: the verifier flags unfaithful citations with F1 ≈
+  0.60–0.81 (high recall 0.75–0.93) against the gold-page proxy.
+- **Naive auto-repair does not help**: re-attribution *lowers* gold-page hit
+  rate in 7/8 configs (none significant), driven by ~45–59% abstention — the
+  retrieved pool frequently lacks a strongly-entailing passage. Conclusion: use
+  the verifier to *flag*, not to auto-repair; the abstention rate implicates
+  retrieval as the bottleneck. Threshold tuning is the natural next experiment.
 
 ## [0.2.3] — 2026-07-06
 
@@ -112,7 +143,8 @@ live PaperPal RAG system, with the Week-1 dataset pinned.
   numbers against Ollama models, the controlled study, and the NLI verifier
   follow in subsequent milestones.
 
-[Unreleased]: https://github.com/pedromussi1/cite-faithfulness/compare/v0.2.3...HEAD
+[Unreleased]: https://github.com/pedromussi1/cite-faithfulness/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.3.0
 [0.2.3]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.2.3
 [0.2.2]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.2.2
 [0.2.1]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.2.1

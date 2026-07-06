@@ -33,5 +33,11 @@ report:             ## aggregate all runs/ into REPORT.md with bootstrap CIs + s
 rescore:            ## re-score all runs offline after an NLI/metric change (seconds, no server)
 	python -m citeval.rescore --all --in-place --nli cross-encoder/nli-deberta-v3-base
 
+verify:             ## evaluate the NLI citation verifier vs gold pages (offline)
+	python -m citeval.verify_eval --all
+
+labels:             ## generate a human-labeling sheet for a run (fill in human_supported)
+	python -m citeval.label_sheet --run dense-8b
+
 figures:            ## render error-bar PNGs (needs: pip install -e ".[viz]")
 	python -m citeval.report --all --baseline dense-8b --figures

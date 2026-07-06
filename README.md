@@ -12,11 +12,11 @@ citation-grounded RAG — reproducing the ALCE citation precision/recall metric
 > is attached to**, using a Natural Language Inference model. That is the
 > difference between "cited the right place" and "the citation is faithful."
 
-Status: **Week 2** — metric reproduced and unit-tested (Week 1); now with a
-**controlled study**: a retrieval-config × model-size sweep scored with
-**bootstrap 95% confidence intervals** and **paired significance tests**, plus a
-results report and error-bar figures. A novel NLI citation verifier follows in
-Week 3. See [`PLAN` in the parent repo](../) for the full arc.
+Status: **Week 3** — metric reproduced (Week 1), controlled study with bootstrap
+CIs + significance tests (Week 2), and now the **novel contribution**: an NLI
+**citation verifier** that flags unsupported citations and re-attributes them to
+the best-supporting retrieved passage — evaluated against human-curated gold
+pages so the result is *not* circular. See [`PLAN` in the parent repo](../).
 
 ## The metric (ALCE, reproduced)
 
@@ -106,6 +106,31 @@ python -m citeval.report --all --baseline dense-8b
 Generating answers is the slow part (needs the GPU host); scoring is cheap and
 now decoupled from it.
 
+## The citation verifier (Week 3, the novel contribution)
+
+`citeval/verifier.py` applies the NLI judge to a model's citations to:
+
+- **flag** cited sentences whose own citations don't entail the claim, and
+- **repair** them by re-attributing the citation to the passage in the
+  retrieved pool that best entails the claim (or *abstain* if none does).
+
+```bash
+python -m citeval.verify_eval --all          # → runs/VERIFIER_REPORT.md
+```
+
+**Avoiding circularity.** Repair uses NLI, so scoring the repaired answer with
+the *same* NLI would be trivially perfect. The evaluation instead uses the
+**human-curated gold pages** (`expected_pages`) as independent ground truth: it
+asks whether the verifier re-attributes citations onto a gold page *more often
+than the raw model*, reported as a paired bootstrap ΔF1 with a CI + p-value. For
+the definitive detection metric, `citeval/label_sheet.py` emits a
+human-labeling sheet (one row per cited sentence) so a person — not the NLI —
+judges support:
+
+```bash
+python -m citeval.label_sheet --run dense-8b   # → labels/dense-8b.jsonl to fill in
+```
+
 ## Layout
 
 ```
@@ -117,6 +142,9 @@ citeval/
   stats.py             bootstrap CIs + paired bootstrap + exact McNemar
   report.py            aggregate runs → REPORT.md (CIs + significance)
   rescore.py           re-score archived runs offline (no server/model)
+  verifier.py          NLI citation verifier: flag unsupported + repair citations
+  verify_eval.py       evaluate the verifier vs gold pages (non-circular)
+  label_sheet.py       emit a human-labeling sheet for definitive detection eval
   plots.py             error-bar figures (optional matplotlib)
   demo.py              self-contained worked example (no server/model)
 scripts/
