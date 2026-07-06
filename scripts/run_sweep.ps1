@@ -14,6 +14,12 @@
 # llama3.1:8b); PaperPal backend installed in its .venv; cite-faithfulness
 # installed with the [nli] extra. 4 configs x 2 models x ~90 s ~= 12-15 min.
 
+param(
+    # By default, cells that already produced a summary.json are skipped
+    # (resume). Pass -Force to re-run every cell from scratch.
+    [switch]$Force
+)
+
 $ErrorActionPreference = "Stop"
 
 # --- paths (edit if your layout differs) ---
@@ -68,6 +74,11 @@ foreach ($m in $models) {
     foreach ($cfg in $configs) {
         $runName = "$($cfg.name)-$($m.tag)"
         $runNames += $runName
+        $summaryPath = Join-Path $citeRoot "runs\$runName\summary.json"
+        if ((Test-Path $summaryPath) -and -not $Force) {
+            Write-Host "`n--- ${runName}: already complete, skipping (use -Force to redo) ---" -ForegroundColor DarkGray
+            continue
+        }
         Write-Host "`n=== $runName (model=$($m.model), hybrid=$($cfg.hybrid), reranker=$($cfg.reranker -ne '')) ===" -ForegroundColor Cyan
         Stop-Backend
 

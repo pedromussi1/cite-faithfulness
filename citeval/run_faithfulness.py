@@ -45,7 +45,13 @@ def load_questions(path: Path) -> list[dict[str, Any]]:
     ]
 
 
-async def main(base_url: str, run_name: str, nli_name: str, threshold: float) -> int:
+async def main(
+    base_url: str,
+    run_name: str,
+    nli_name: str,
+    threshold: float,
+    query_timeout: float = 120.0,
+) -> int:
     if not DATASET.exists():
         print(f"Dataset not found: {DATASET}")
         return 2
@@ -73,7 +79,19 @@ async def main(base_url: str, run_name: str, nli_name: str, threshold: float) ->
                 scope = [q["paper_id"]] if q.get("paper_id") else None
                 print(f"[{i:>2}/{len(questions)}] {q['id']}: {q['question'][:55]}...", flush=True)
                 try:
-                    outcome = await client.query(q["question"], paper_ids=scope)
+                    # Hard per-question cap: small local models can enter a
+                    # token-repetition loop and stream forever, which the
+                    # per-read HTTP timeout never catches. Abandon such a
+                    # question, log it, and keep the sweep moving.
+                    outcome = await asyncio.wait_for(
+                        client.query(q["question"], paper_ids=scope),
+                        timeout=query_timeout,
+                    )
+                except TimeoutError:
+                    print(f"  TIMEOUT after {query_timeout:.0f}s — skipping (runaway generation?)")
+                    out.write(json.dumps({**q, "error": f"timeout>{query_timeout:.0f}s"}) + "\n")
+                    out.flush()
+                    continue
                 except Exception as exc:  # noqa: BLE001 — archive and continue
                     print(f"  FAILED: {type(exc).__name__}: {exc}")
                     out.write(json.dumps({**q, "error": str(exc)}) + "\n")
@@ -155,5 +173,15 @@ if __name__ == "__main__":
         help="NLI backend: 'mock' or an HF cross-encoder NLI checkpoint name.",
     )
     parser.add_argument("--threshold", type=float, default=0.5)
+    parser.add_argument(
+        "--query-timeout",
+        type=float,
+        default=120.0,
+        help="Hard per-question cap (s); a slower answer is skipped as a timeout.",
+    )
     args = parser.parse_args()
-    raise SystemExit(asyncio.run(main(args.base_url, args.name, args.nli, args.threshold)))
+    raise SystemExit(
+        asyncio.run(
+            main(args.base_url, args.name, args.nli, args.threshold, args.query_timeout)
+        )
+    )

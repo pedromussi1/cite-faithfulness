@@ -15,6 +15,20 @@ Minor versions track the project's weekly research milestones (see the
 - Dataset expansion to ~100–200 hand-audited questions with statement-level
   support labels.
 
+## [0.2.3] — 2026-07-06
+
+### Fixed
+- **Runaway-generation hang** (`run_faithfulness`): a small local model can
+  enter a token-repetition loop and stream forever, which the per-read HTTP
+  timeout never catches — hanging the whole sweep on one question. Added a hard
+  per-question cap (`--query-timeout`, default 120s): a slower answer is
+  abandoned, logged as a timeout error, and the sweep continues.
+
+### Added
+- **Resumable sweep** (`scripts/run_sweep.ps1`): cells that already produced a
+  `summary.json` are skipped by default, so an interrupted sweep resumes where
+  it stopped instead of redoing completed cells. `-Force` re-runs everything.
+
 ## [0.2.2] — 2026-07-06
 
 ### Added
@@ -98,7 +112,8 @@ live PaperPal RAG system, with the Week-1 dataset pinned.
   numbers against Ollama models, the controlled study, and the NLI verifier
   follow in subsequent milestones.
 
-[Unreleased]: https://github.com/pedromussi1/cite-faithfulness/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/pedromussi1/cite-faithfulness/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.2.3
 [0.2.2]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.2.2
 [0.2.1]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.2.1
 [0.2.0]: https://github.com/pedromussi1/cite-faithfulness/releases/tag/v0.2.0
