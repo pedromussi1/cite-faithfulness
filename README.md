@@ -131,6 +131,30 @@ judges support:
 python -m citeval.label_sheet --run dense-8b   # → labels/dense-8b.jsonl to fill in
 ```
 
+## Threshold sensitivity (Week 4)
+
+The verifier's one knob — the entailment threshold `tau` — trades **detection** (flagging
+unsupported citations) against **abstention** (declining to re-attribute when nothing entails).
+Since both decisions are thresholds over continuous NLI scores that don't depend on `tau`,
+`citeval/threshold.py` caches those scores once per run, then sweeps `tau` analytically — so the
+whole curve costs a single NLI pass and re-sweeps are instant and torch-free:
+
+```bash
+python -m citeval.threshold --all      # score once → runs/THRESHOLD_REPORT.md
+python -m citeval.threshold --all --from-cache   # re-sweep, no model load
+```
+
+Findings ([`runs/THRESHOLD_REPORT.md`](runs/THRESHOLD_REPORT.md)): detection F1 is nearly flat in
+`tau` (the flagger needs no tuning), while repair only worsens as `tau` rises — its Δ vs. the raw
+model is never significantly positive and turns significantly negative at high `tau`. Reinforces
+*flag, don't auto-repair*.
+
+## Paper
+
+[`PAPER.md`](PAPER.md) is the full write-up — abstract, related work (ALCE / RAGAS / FactScore),
+method, results with confidence intervals, and limitations — pulling the study, the verifier, and
+the threshold analysis into one narrative.
+
 ## Layout
 
 ```
@@ -144,6 +168,7 @@ citeval/
   rescore.py           re-score archived runs offline (no server/model)
   verifier.py          NLI citation verifier: flag unsupported + repair citations
   verify_eval.py       evaluate the verifier vs gold pages (non-circular)
+  threshold.py         verifier threshold sweep (cached scores → THRESHOLD_REPORT.md)
   label_sheet.py       emit a human-labeling sheet for definitive detection eval
   plots.py             error-bar figures (optional matplotlib)
   demo.py              self-contained worked example (no server/model)

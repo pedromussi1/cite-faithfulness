@@ -7,13 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 Minor versions track the project's weekly research milestones (see the
 [project plan](../)); `v1.0.0` marks the completed study + writeup.
 
-## [Unreleased]
+## [1.0.0] — 2026-07-07
 
-### Planned (Week 4 — writeup + robustness)
-- Verifier threshold sensitivity analysis (abstention vs. accuracy trade-off).
-- Human statement-level labels via `label_sheet.py` for the definitive
-  detection metric; dataset expansion to ~100–200 hand-audited questions.
-- `PAPER.md` writeup.
+Fourth milestone and **1.0**: the study, the verifier, and the write-up brought
+together into a complete, citable artifact.
+
+### Added
+- **Verifier threshold sensitivity analysis** (`citeval/threshold.py`). Caches
+  the two continuous NLI scores the threshold gates (the model's own cited-passage
+  entailment, and the best entailment over the retrieved pool), then sweeps `tau`
+  **analytically** — one NLI pass, and re-sweeps are instant and torch-free
+  (`--from-cache`). Emits `runs/THRESHOLD_REPORT.md`. Finding: detection F1 is
+  nearly flat in `tau` (the flagger needs no tuning), while repair's Δ vs. the raw
+  model is never significantly positive at any `tau` and turns significantly
+  *negative* at high `tau` — reinforcing *flag, don't auto-repair*.
+- **5 new tests**, including one that proves the analytic sweep reproduces
+  `verify_eval` field-for-field (with seeded bootstrap CIs) at a given `tau`.
+- **`PAPER.md`** — the full write-up: abstract, related work (ALCE / RAGAS /
+  FactScore), method, experimental setup, results with confidence intervals,
+  limitations, and conclusion, grounded in the archived runs.
+- README sections for the threshold analysis and the paper.
+
+### Notes
+- Dataset expansion to ~100–200 questions (to tighten the CIs and power the
+  retrieval-lift comparison) is deferred to a future release; it needs a live
+  re-sweep on GPU. `n=26` is stated as an explicit limitation in `PAPER.md`.
+
+## [Unreleased]
 
 ## [0.3.0] — 2026-07-06
 

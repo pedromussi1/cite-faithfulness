@@ -1,0 +1,242 @@
+[
+  {
+    "qid": "att-01",
+    "raw_hit": 0,
+    "has_cited": true,
+    "cited_joint_prob": 0.02087927982211113,
+    "best_prob": 0.17972862720489502,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "att-03",
+    "raw_hit": 0,
+    "has_cited": true,
+    "cited_joint_prob": 0.022011585533618927,
+    "best_prob": 0.060312576591968536,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "att-04",
+    "raw_hit": 1,
+    "has_cited": true,
+    "cited_joint_prob": 0.0608464851975441,
+    "best_prob": 0.06084595248103142,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "att-05",
+    "raw_hit": 1,
+    "has_cited": true,
+    "cited_joint_prob": 0.0338929183781147,
+    "best_prob": 0.0338929183781147,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "att-06",
+    "raw_hit": 0,
+    "has_cited": false,
+    "cited_joint_prob": 0.0,
+    "best_prob": 0.019787106662988663,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "att-06",
+    "raw_hit": 0,
+    "has_cited": false,
+    "cited_joint_prob": 0.0,
+    "best_prob": 0.8308653235435486,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "att-07",
+    "raw_hit": 0,
+    "has_cited": true,
+    "cited_joint_prob": 0.004004315938800573,
+    "best_prob": 0.00426827697083354,
+    "best_in_gold": 0
+  },
+  {
+    "qid": "att-08",
+    "raw_hit": 0,
+    "has_cited": false,
+    "cited_joint_prob": 0.0,
+    "best_prob": 0.013808812014758587,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "att-08",
+    "raw_hit": 0,
+    "has_cited": false,
+    "cited_joint_prob": 0.0,
+    "best_prob": 0.9960805773735046,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "att-10",
+    "raw_hit": 0,
+    "has_cited": true,
+    "cited_joint_prob": 0.0020171841606497765,
+    "best_prob": 0.981111466884613,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "att-11",
+    "raw_hit": 1,
+    "has_cited": true,
+    "cited_joint_prob": 0.65529465675354,
+    "best_prob": 0.6552944779396057,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "att-12",
+    "raw_hit": 1,
+    "has_cited": true,
+    "cited_joint_prob": 0.004006321541965008,
+    "best_prob": 0.004006321541965008,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "att-12",
+    "raw_hit": 1,
+    "has_cited": true,
+    "cited_joint_prob": 0.006422760430723429,
+    "best_prob": 0.006422766484320164,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "bert-01",
+    "raw_hit": 1,
+    "has_cited": true,
+    "cited_joint_prob": 0.9973324537277222,
+    "best_prob": 0.9973324537277222,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "bert-02",
+    "raw_hit": 1,
+    "has_cited": true,
+    "cited_joint_prob": 0.034996386617422104,
+    "best_prob": 0.8473154902458191,
+    "best_in_gold": 0
+  },
+  {
+    "qid": "bert-03",
+    "raw_hit": 0,
+    "has_cited": true,
+    "cited_joint_prob": 0.002277971711009741,
+    "best_prob": 0.0022779698483645916,
+    "best_in_gold": 0
+  },
+  {
+    "qid": "bert-03",
+    "raw_hit": 0,
+    "has_cited": true,
+    "cited_joint_prob": 0.0005196721758693457,
+    "best_prob": 0.0008682842599228024,
+    "best_in_gold": 0
+  },
+  {
+    "qid": "bert-05",
+    "raw_hit": 0,
+    "has_cited": true,
+    "cited_joint_prob": 0.0018796480726450682,
+    "best_prob": 0.01695099100470543,
+    "best_in_gold": 0
+  },
+  {
+    "qid": "bert-05",
+    "raw_hit": 0,
+    "has_cited": true,
+    "cited_joint_prob": 0.18115808069705963,
+    "best_prob": 0.18115819990634918,
+    "best_in_gold": 0
+  },
+  {
+    "qid": "bert-06",
+    "raw_hit": 0,
+    "has_cited": true,
+    "cited_joint_prob": 0.002796585438773036,
+    "best_prob": 0.06667979806661606,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "lora-01",
+    "raw_hit": 1,
+    "has_cited": true,
+    "cited_joint_prob": 0.9976110458374023,
+    "best_prob": 0.9976110458374023,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "lora-03",
+    "raw_hit": 1,
+    "has_cited": true,
+    "cited_joint_prob": 0.6315630674362183,
+    "best_prob": 0.6315629482269287,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "lora-05",
+    "raw_hit": 0,
+    "has_cited": true,
+    "cited_joint_prob": 0.993674635887146,
+    "best_prob": 0.993674635887146,
+    "best_in_gold": 0
+  },
+  {
+    "qid": "lora-05",
+    "raw_hit": 1,
+    "has_cited": true,
+    "cited_joint_prob": 0.00020757628954015672,
+    "best_prob": 0.003965441603213549,
+    "best_in_gold": 0
+  },
+  {
+    "qid": "lora-06",
+    "raw_hit": 0,
+    "has_cited": false,
+    "cited_joint_prob": 0.0,
+    "best_prob": 0.5810685157775879,
+    "best_in_gold": 0
+  },
+  {
+    "qid": "clip-02",
+    "raw_hit": 1,
+    "has_cited": true,
+    "cited_joint_prob": 0.993051290512085,
+    "best_prob": 0.993051290512085,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "clip-03",
+    "raw_hit": 1,
+    "has_cited": true,
+    "cited_joint_prob": 0.7832151055335999,
+    "best_prob": 0.7832170724868774,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "clip-05",
+    "raw_hit": 1,
+    "has_cited": true,
+    "cited_joint_prob": 0.988452136516571,
+    "best_prob": 0.988452136516571,
+    "best_in_gold": 1
+  },
+  {
+    "qid": "clip-06",
+    "raw_hit": 0,
+    "has_cited": true,
+    "cited_joint_prob": 0.9905170798301697,
+    "best_prob": 0.9905170798301697,
+    "best_in_gold": 0
+  },
+  {
+    "qid": "clip-06",
+    "raw_hit": 0,
+    "has_cited": true,
+    "cited_joint_prob": 0.0003969644021708518,
+    "best_prob": 0.0030087812338024378,
+    "best_in_gold": 0
+  }
+]
